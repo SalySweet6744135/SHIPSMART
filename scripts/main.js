@@ -334,15 +334,15 @@ Purpose: JavaScript functionality — navigation toggle, tracking form validatio
       return ok;
     };
 
-    // — Submit handler —
-    feedbackForm.addEventListener("submit", (e) => {
-      e.preventDefault();
+    // — Submit handler (button click — more reliable than form submit on iOS WebKit) —
+    const submitBtn = document.getElementById("submitBtn");
+    submitBtn?.addEventListener("click", () => {
 
       // Run full validation — stop here if anything fails
       if (!validateFeedback()) {
         const firstErr = feedbackForm.querySelector(".error:not(:empty)");
         if (firstErr) firstErr.scrollIntoView({ behavior: "smooth", block: "center" });
-        return; // ← hard stop: never reaches success below
+        return; // hard stop — never reaches success below
       }
 
       // ── Every required field is valid — show success modal ──
