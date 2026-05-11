@@ -78,17 +78,30 @@ Purpose: ShipSmart Feedback Page — user feedback form with client-side validat
         <form id="feedbackForm" class="card feedback-card" action="../server/process_feedback.php" method="POST" novalidate>
           <h2>Feedback Form</h2>
 
-          <!-- Text field: Full Name -->
-          <div class="form-group">
-            <label for="fullName">Full Name <span class="required-star">*</span></label>
-            <input
-              type="text"
-              id="fullName"
-              name="fullName"
-              placeholder="e.g., Sara Ahmed"
-              required
-            >
-            <p class="error" id="nameError" aria-live="polite"></p>
+          <!-- Name fields: First + Last inline -->
+          <div class="name-row">
+            <div class="form-group">
+              <label for="firstName">First Name <span class="required-star">*</span></label>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                placeholder="e.g., Sara"
+                required
+              >
+              <p class="error" id="firstNameError" aria-live="polite"></p>
+            </div>
+            <div class="form-group">
+              <label for="lastName">Last Name <span class="required-star">*</span></label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                placeholder="e.g., Ahmed"
+                required
+              >
+              <p class="error" id="lastNameError" aria-live="polite"></p>
+            </div>
           </div>
 
           <!-- Text field: Email -->
@@ -189,12 +202,14 @@ Purpose: ShipSmart Feedback Page — user feedback form with client-side validat
         </form>
       </div>
 
-    <!-- ===================== SUCCESS MESSAGE (hidden, shown via JS) ===================== -->
-    <div id="feedbackSuccess" class="container feedback-success" hidden>
-      <div class="card success-card">
-        <h2>Thank You!</h2>
-        <p>Your feedback has been submitted successfully. We appreciate your time!</p>
-        <div class="form-actions" style="justify-content:center">
+    <!-- ===================== SUCCESS MODAL (hidden, shown via JS) ===================== -->
+    <div id="feedbackSuccess" class="modal-overlay" hidden aria-modal="true" role="dialog" aria-labelledby="successTitle">
+      <div class="modal-box card">
+        <!-- Checkmark icon -->
+        <div class="modal-icon" aria-hidden="true">✓</div>
+        <h2 id="successTitle">Thank You!</h2>
+        <p>Your feedback has been submitted successfully.<br>We appreciate your time!</p>
+        <div class="modal-actions">
           <a class="btn btn-primary btn-inline" href="../index.html">Back to Home</a>
           <button class="btn btn-ghost" type="button" id="submitAnotherBtn">Submit Another</button>
         </div>

@@ -965,12 +965,16 @@ cite{
   flex-wrap:wrap;
   margin-top:6px;
 }
-.form-actions .btn-primary{
-  width:auto;
-  flex:1;
-}
+.form-actions .btn-primary,
 .form-actions .btn-ghost{
-  flex:0 0 auto;
+  display: flex;
+  flex: 0 0 calc(50% - 6px); /* exact equal halves minus half the gap */
+  width: calc(50% - 6px);
+  min-width: 0;
+  box-sizing: border-box;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0;
 }
 
 /* Input error state */
@@ -979,6 +983,21 @@ cite{
 .form-group.has-error textarea{
   border-color:#b00020;
   box-shadow: 0 0 0 3px rgba(176,0,32,0.10);
+}
+.form-fieldset.has-error{
+  border: 1.5px solid #b00020;
+  border-radius: var(--radius);
+  padding: 10px 14px 4px;
+}
+
+/* First + Last name side-by-side */
+.name-row{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media(max-width:560px){
+  .name-row{ grid-template-columns: 1fr; }
 }
 
 /* Sidebar */
@@ -1013,24 +1032,81 @@ cite{
   line-height:1.6;
 }
 
-/* Success card */
-.feedback-success{
-  text-align:center;
-  padding:40px 0;
+/* ===================== SUCCESS MODAL ===================== */
+.modal-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 20px;
+  animation: fadeIn .2s ease;
 }
-.success-card{
-  padding:36px;
-  max-width:500px;
-  margin:0 auto;
+.modal-overlay[hidden]{
+  display: none;
 }
-.success-card h2{
+.modal-box{
+  width: 100%;
+  max-width: 480px;
+  padding: 44px 40px 36px;
+  text-align: center;
+  animation: slideUp .25s ease;
+}
+.modal-icon{
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 2rem;
+  line-height: 64px;
+  margin: 0 auto 20px;
+}
+.modal-box h2{
   color: var(--primary);
-  margin:0 0 10px;
+  margin: 0 0 10px;
+  font-size: 1.6rem;
 }
-.success-card p{
-  margin:0 0 18px;
-  color:#2b2b2b;
+.modal-box p{
+  color: #2b2b2b;
+  margin: 0 0 28px;
+  line-height: 1.7;
 }
+.modal-actions{
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.modal-actions .btn{
+  display: flex;
+  flex: 0 0 calc(50% - 6px); /* exact half minus half the gap → always equal */
+  width: calc(50% - 6px);    /* belt-and-suspenders for <a> vs <button> */
+  min-width: 0;
+  box-sizing: border-box;
+  justify-content: center;
+  align-items: center;
+  padding: 14px 20px;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-top: 0;             /* cancel .btn-primary margin-top */
+}
+@keyframes fadeIn{
+  from{ opacity:0; }
+  to  { opacity:1; }
+}
+@keyframes slideUp{
+  from{ transform: translateY(30px); opacity:0; }
+  to  { transform: translateY(0);    opacity:1; }
+}
+
+/* (kept for backwards compat — no longer used) */
+.feedback-success{ display:none; }
 
 /* ===================== SERVICES PAGE ===================== */
 .services-grid{

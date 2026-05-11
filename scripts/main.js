@@ -187,7 +187,8 @@ Purpose: JavaScript functionality — navigation toggle, tracking form validatio
 
   if (feedbackForm) {
     // — Elements —
-    const fName      = document.getElementById("fullName");
+    const fFirstName = document.getElementById("firstName");
+    const fLastName  = document.getElementById("lastName");
     const fEmail     = document.getElementById("email");
     const fCarrier   = document.getElementById("preferredCarrier");
     const fComments  = document.getElementById("comments");
@@ -196,7 +197,8 @@ Purpose: JavaScript functionality — navigation toggle, tracking form validatio
     const fResetBtn  = document.getElementById("resetBtn");
 
     // Error placeholders
-    const nameErr     = document.getElementById("nameError");
+    const firstNameErr = document.getElementById("firstNameError");
+    const lastNameErr  = document.getElementById("lastNameError");
     const emailErr    = document.getElementById("emailError");
     const ratingErr   = document.getElementById("ratingError");
     const servicesErr = document.getElementById("servicesError");
@@ -205,20 +207,74 @@ Purpose: JavaScript functionality — navigation toggle, tracking form validatio
     const MAX_CHARS = 500;
 
     // — Helpers —
-    const setErr = (el, msg) => { if (el) el.textContent = msg; };
-    const clrErr = (...els) => els.forEach(e => { if (e) e.textContent = ""; });
+    // Mark the closest .form-group as having an error (red border on input)
+    const setErr = (el, msg) => {
+      if (!el) return;
+      el.textContent = msg;
+      el.closest(".form-group, .form-fieldset")?.classList.add("has-error");
+    };
+    const clrErr = (...els) => {
+      els.forEach(e => {
+        if (!e) return;
+        e.textContent = "";
+        e.closest(".form-group, .form-fieldset")?.classList.remove("has-error");
+      });
+    };
 
     const isValidName = (v) => {
       const val = (v || "").trim();
-      // At least 2 characters, only letters & spaces
-      return val.length >= 2 && /^[A-Za-z\u0600-\u06FF\s]+$/.test(val);
+      // Min 2 letters, only English or Arabic letters (no digits, no spaces, no special chars)
+      return val.length >= 2 && /^[A-Za-z\u0621-\u064A]+$/.test(val);
     };
 
     const isValidEmail = (v) => {
       const val = (v || "").trim();
-      // Simple email pattern
-      return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val);
+      if (!val) return false;
+
+      // Regex-based validation (GeeksforGeeks approach):
+      // ^[^\s@]+ — local part: no spaces or @, min 2 chars
+      // @
+      // [^\s@]{2,} — domain name: no spaces or @, min 2 chars
+      // \.
+      // [^\s@]{2,}$ — TLD: no spaces or @, min 2 chars
+      const pattern = /^[^\s@]{2,}@[^\s@]{2,}\.[^\s@]{2,}$/;
+      return pattern.test(val);
     };
+
+    // — Live on-blur validation —
+    fFirstName?.addEventListener("blur", () => {
+      if (fFirstName.value.trim() === "") {
+        clrErr(firstNameErr);
+      } else if (!isValidName(fFirstName.value)) {
+        setErr(firstNameErr, "First name must be at least 2 letters, no numbers or symbols.");
+      } else {
+        clrErr(firstNameErr);
+      }
+    });
+
+    fLastName?.addEventListener("blur", () => {
+      if (fLastName.value.trim() === "") {
+        clrErr(lastNameErr);
+      } else if (!isValidName(fLastName.value)) {
+        setErr(lastNameErr, "Last name must be at least 2 letters, no numbers or symbols.");
+      } else {
+        clrErr(lastNameErr);
+      }
+    });
+
+    fEmail?.addEventListener("blur", () => {
+      if (fEmail.value.trim() === "") {
+        clrErr(emailErr);         // don't nag on empty until submit
+      } else if (!isValidEmail(fEmail.value)) {
+        setErr(emailErr, "Please enter a valid email address (e.g., name@example.com).");
+      } else {
+        clrErr(emailErr);
+      }
+    });
+
+    fCarrier?.addEventListener("change", () => {
+      if (fCarrier.value) clrErr(carrierPErr);
+    });
 
     // — Character counter —
     fComments?.addEventListener("input", () => {
@@ -234,16 +290,22 @@ Purpose: JavaScript functionality — navigation toggle, tracking form validatio
 
     // — Full validation —
     const validateFeedback = () => {
-      clrErr(nameErr, emailErr, ratingErr, servicesErr, carrierPErr);
+      clrErr(firstNameErr, lastNameErr, emailErr, ratingErr, servicesErr, carrierPErr);
       let ok = true;
 
-      // 1. Full Name
-      if (!isValidName(fName?.value)) {
-        setErr(nameErr, "Please enter your full name (min 2 characters, letters only).");
+      // 1. First Name
+      if (!isValidName(fFirstName?.value)) {
+        setErr(firstNameErr, "First name must be at least 2 letters, no numbers or symbols.");
         ok = false;
       }
 
-      // 2. Email
+      // 2. Last Name
+      if (!isValidName(fLastName?.value)) {
+        setErr(lastNameErr, "Last name must be at least 2 letters, no numbers or symbols.");
+        ok = false;
+      }
+
+      // 3. Email
       if (!isValidEmail(fEmail?.value)) {
         setErr(emailErr, "Please enter a valid email address (e.g., name@example.com).");
         ok = false;
@@ -272,84 +334,42 @@ Purpose: JavaScript functionality — navigation toggle, tracking form validatio
       return ok;
     };
 
-    // — Submit handler (sends data to PHP/MySQL via fetch) —
+    // — Submit handler —
     feedbackForm.addEventListener("submit", (e) => {
       e.preventDefault();
+      e.stopImmediatePropagation();
 
-      // Client-side validation first
+      // Run full validation — stop here if anything fails
       if (!validateFeedback()) {
         const firstErr = feedbackForm.querySelector(".error:not(:empty)");
         if (firstErr) firstErr.scrollIntoView({ behavior: "smooth", block: "center" });
-        return;
+        return; // ← hard stop: never reaches success below
       }
 
-      // Collect form data
-      const formData = new FormData(feedbackForm);
+      // ── Every required field is valid — show success modal ──
+      feedbackForm.reset();
+      clrErr(firstNameErr, lastNameErr, emailErr, ratingErr, servicesErr, carrierPErr);
+      if (fCharCount) fCharCount.textContent = "0 / " + MAX_CHARS + " characters";
 
-      // Disable submit button while sending
-      const submitBtn = feedbackForm.querySelector('button[type="submit"]');
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Submitting…";
-      }
-
-      // Send to server via fetch
-      fetch(feedbackForm.action, {
-        method: "POST",
-        body: formData
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success) {
-            // Reset (clear) the form fields
-            feedbackForm.reset();
-            clrErr(nameErr, emailErr, ratingErr, servicesErr, carrierPErr);
-            if (fCharCount) fCharCount.textContent = "0 / " + MAX_CHARS + " characters";
-
-            // Show success card, hide the form layout
-            feedbackForm.closest(".feedback-layout")?.setAttribute("hidden", "");
-            if (fSuccess) fSuccess.hidden = false;
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          } else {
-            // Show server-side validation error
-            alert("Server error: " + (data.message || "Something went wrong."));
-          }
-        })
-        .catch(() => {
-          // Network error or PHP not running — fall back to demo success
-          feedbackForm.reset();
-          clrErr(nameErr, emailErr, ratingErr, servicesErr, carrierPErr);
-          if (fCharCount) fCharCount.textContent = "0 / " + MAX_CHARS + " characters";
-
-          feedbackForm.closest(".feedback-layout")?.setAttribute("hidden", "");
-          if (fSuccess) fSuccess.hidden = false;
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        })
-        .finally(() => {
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = "Submit Feedback";
-          }
-        });
+      if (fSuccess) fSuccess.hidden = false;   // show modal overlay
+      document.body.style.overflow = "hidden"; // prevent background scroll
     });
 
     // — Reset handler —
     fResetBtn?.addEventListener("click", () => {
-      // Native reset happens automatically; clear error text after a tick
       setTimeout(() => {
-        clrErr(nameErr, emailErr, ratingErr, servicesErr, carrierPErr);
+        clrErr(firstNameErr, lastNameErr, emailErr, ratingErr, servicesErr, carrierPErr);
         if (fCharCount) fCharCount.textContent = "0 / " + MAX_CHARS + " characters";
       }, 0);
     });
 
-    // — "Submit Another" button: hide success card, show the cleared form again —
+    // — "Submit Another" button: close modal, restore form & scroll —
     const submitAnotherBtn = document.getElementById("submitAnotherBtn");
     submitAnotherBtn?.addEventListener("click", () => {
       if (fSuccess) fSuccess.hidden = true;
-      const layout = document.querySelector(".feedback-layout");
-      if (layout) layout.removeAttribute("hidden");
+      document.body.style.overflow = ""; // restore scroll
       window.scrollTo({ top: 0, behavior: "smooth" });
-      fName?.focus();
+      fFirstName?.focus();
     });
   }
 })();
