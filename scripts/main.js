@@ -166,39 +166,38 @@ Purpose: JavaScript functionality — navigation toggle, tracking form validatio
     }
   }, { passive: false });
 
-  // ===== Events =====
+  // ===== Nav toggle =====
   navToggle?.addEventListener("click", () => {
     const opened = document.body.classList.toggle("menu-open");
     navToggle.setAttribute("aria-expanded", String(opened));
   });
 
-  trackForm?.addEventListener("submit", (e) => {
-    e.preventDefault();
+  // ===== Track button: click + touchend (iOS Safari/Chrome fix) =====
+  const doTrack = (e) => {
+    if (e) { e.preventDefault(); e.stopImmediatePropagation(); }
 
-    if (demoMode && !demoMode.checked) return;  // guard: button should already be disabled
+    // Hard block if demo checkbox is unchecked
+    if (!demoMode?.checked) return;
 
-    if (!validate()) {
-      return;
-    }
+    if (!validate()) return;
 
-    // If demo mode enabled -> show result on this page (no PHP needed)
-    if (demoMode?.checked) {
-      showResult(false);
-      resetTimeline();
-      setBadge("Loading", "info");
+    showResult(false);
+    resetTimeline();
+    setBadge("Loading", "info");
+    showLoading(true);
+    setTimeout(() => {
+      showLoading(false);
+      renderDemo();
+    }, 900);
+  };
 
-      showLoading(true);
-      setTimeout(() => {
-        showLoading(false);
-        renderDemo();
-      }, 900);
+  trackBtn?.addEventListener("click",    doTrack);
+  trackBtn?.addEventListener("touchend", doTrack, { passive: false });
 
-      return;
-    }
+  // Prevent form from submitting natively (iOS may still try)
+  trackForm?.addEventListener("submit", (e) => { e.preventDefault(); });
 
-    // Otherwise: programmatic POST to server/track.php (submit() does not re-trigger this handler)
-    trackForm.submit();
-  });
+
 
   newSearchBtn?.addEventListener("click", () => {
     showResult(false);
