@@ -156,10 +156,20 @@ a:hover{ text-decoration:underline; }
 .hero-grid{
   position:relative;
   z-index:1;
-  display:grid;
-  grid-template-columns: 1.1fr 0.9fr;
+  display:flex;
+  flex-direction:column;
   gap:22px;
-  align-items:start;
+}
+
+.hero-left{
+  display:flex;
+  flex-direction:column;
+  width:100%;
+}
+
+.hero-left .card{
+  width:100%;
+  box-sizing:border-box;
 }
 
 .hero-right .illustration.card{
@@ -714,14 +724,13 @@ cite{
 
 /* ===================== RESPONSIVE ===================== */
 @media (max-width: 980px){
-  .hero-grid{ grid-template-columns: 1fr; }
   .field-grid{ grid-template-columns: 1fr; }
   .result-grid{ grid-template-columns: 1fr; }
   .grid-3{ grid-template-columns: 1fr; }
   .how-grid{ grid-template-columns: 1fr; }
   .footer-grid{ grid-template-columns: 1fr; }
 
-  .hero-media{ height:280px; } /* a bit smaller on mobile */
+  .hero-media{ height:280px; }
 }
 
 @media (max-width: 860px){
