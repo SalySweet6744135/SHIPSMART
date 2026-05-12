@@ -159,30 +159,17 @@ Purpose: JavaScript functionality — navigation toggle, tracking form validatio
     navToggle.setAttribute("aria-expanded", String(opened));
   });
 
-  // ===== Track button — single handler for click AND touchend (iOS fix) =====
-  let _trackFired = false; // debounce: touchend + click both fire on iOS
-
-  const doTrack = (e) => {
-    e.preventDefault();
-    e.stopImmediatePropagation();
-
-    // Debounce: ignore the click that always follows touchend on iOS
-    if (e.type === "touchend") { _trackFired = true; }
-    else if (e.type === "click" && _trackFired) { _trackFired = false; return; }
-    else { _trackFired = false; }
-
-    // Read checkbox state fresh every time — works on all iOS browsers
+  // ===== Track button =====
+  const doTrack = () => {
+    // Read checkbox state fresh — works on all iOS browsers
     const isDemoChecked = !!document.getElementById("demoMode")?.checked;
+    const hint = document.getElementById("demohint");
+
     if (!isDemoChecked) {
-      // Show inline message instead of silently failing
-      const hint = document.getElementById("demohint");
-      if (hint) { hint.style.display = "block"; }
+      if (hint) hint.style.display = "block";
       return;
     }
-
-    // Hide hint if visible
-    const hint = document.getElementById("demohint");
-    if (hint) { hint.style.display = "none"; }
+    if (hint) hint.style.display = "none";
 
     if (!validate()) return;
 
@@ -196,10 +183,9 @@ Purpose: JavaScript functionality — navigation toggle, tracking form validatio
     }, 900);
   };
 
-  trackBtn?.addEventListener("click",    doTrack);
-  trackBtn?.addEventListener("touchend", doTrack, { passive: false });
+  trackBtn?.addEventListener("click", doTrack);
 
-  // Prevent native form submission on iOS
+  // Prevent native form submission
   trackForm?.addEventListener("submit", (e) => { e.preventDefault(); });
 
 
