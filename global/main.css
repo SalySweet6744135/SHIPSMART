@@ -155,15 +155,11 @@ a:hover{ text-decoration:underline; }
 
 .hero-grid{
   position:relative;
-  z-index:1; /* keep content above blob */
-  display:flex;
-  flex-direction:column;
+  z-index:1;
+  display:grid;
+  grid-template-columns: 1.1fr 0.9fr;
   gap:22px;
-}
-
-.hero-left,
-.hero-right{
-  width:100%;
+  align-items:start;
 }
 
 .hero-right .illustration.card{

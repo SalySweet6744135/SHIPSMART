@@ -82,8 +82,16 @@ Purpose: JavaScript functionality — navigation toggle, tracking form validatio
     return ok;
   };
 
-  const showLoading = (on) => { if (loadingBox) loadingBox.hidden = !on; };
-  const showResult = (on) => { if (resultArea) resultArea.hidden = !on; };
+  const showLoading = (on) => {
+    if (!loadingBox) return;
+    loadingBox.hidden = !on;
+    loadingBox.style.display = on ? "" : "none";
+  };
+  const showResult = (on) => {
+    if (!resultArea) return;
+    resultArea.hidden = !on;
+    resultArea.style.display = on ? "" : "none";
+  };
 
   const resetTimeline = () => {
     steps.forEach(s => s.classList.remove("done", "active"));
@@ -101,14 +109,18 @@ Purpose: JavaScript functionality — navigation toggle, tracking form validatio
     });
   };
 
-  // Save last carrier
+  // Save last carrier — wrapped in try/catch for iOS private mode
   const STORAGE_KEY = "shipsmart_last_carrier";
   if (carrierSelect) {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) carrierSelect.value = saved;
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) carrierSelect.value = saved;
+    } catch(e) {}
 
     carrierSelect.addEventListener("change", () => {
-      if (carrierSelect.value) localStorage.setItem(STORAGE_KEY, carrierSelect.value);
+      try {
+        if (carrierSelect.value) localStorage.setItem(STORAGE_KEY, carrierSelect.value);
+      } catch(e) {}
     });
   }
 
