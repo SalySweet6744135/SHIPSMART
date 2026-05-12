@@ -53,6 +53,12 @@ a:hover{ text-decoration:underline; }
   margin:0 auto;
 }
 
+@media (min-width: 981px){
+  .container{
+    width: min(1300px, 96%);
+  }
+}
+
 /* ===================== HEADER ===================== */
 .site-header{
   position:sticky;
@@ -227,7 +233,7 @@ a:hover{ text-decoration:underline; }
 }
 
 .track-card{
-  padding:16px;
+  padding:36px 40px;
 }
 
 .field-grid{
